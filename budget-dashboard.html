@@ -1,0 +1,967 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Budget Dashboard · GHS</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,700;0,900;1,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    ::-webkit-scrollbar { display: none; }
+    body { -webkit-font-smoothing: antialiased; background: #f6f6f6; font-family: sans-serif; }
+
+    .btn-primary { background: #000; color: #fff; border: none; padding: 14px 22px; font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 6px; transition: opacity 0.12s; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+    .btn-primary:active { opacity: 0.65; }
+    .btn-primary.full { width: 100%; padding: 15px; }
+    .btn-primary.sm { padding: 10px 16px; font-size: 10px; }
+
+    .btn-outline { background: transparent; color: #000; border: 1.5px solid #000; padding: 13px 20px; font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 6px; transition: all 0.12s; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+    .btn-outline:active { background: #000; color: #fff; }
+    .btn-outline.sm { padding: 10px 16px; font-size: 10px; border-width: 1px; }
+
+    .btn-ghost { background: transparent; color: #888; border: 1px solid #e0e0e0; padding: 10px 16px; font-family: 'DM Mono', monospace; font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; border-radius: 5px; -webkit-tap-highlight-color: transparent; white-space: nowrap; }
+    .btn-ghost:active { background: #f5f5f5; }
+
+    .btn-danger { background: transparent; color: #000; border: 1.5px solid #000; padding: 13px 20px; font-family: 'DM Mono', monospace; font-size: 11px; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 6px; -webkit-tap-highlight-color: transparent; }
+    .btn-danger:active { background: #000; color: #fff; }
+
+    .btn-icon { background: none; border: none; color: #c8c8c8; font-size: 20px; cursor: pointer; padding: 4px 8px; line-height: 1; -webkit-tap-highlight-color: transparent; transition: color 0.1s; }
+    .btn-icon:active { color: #000; }
+
+    .btn-undo { background: transparent; color: #bbb; border: 1px dashed #d8d8d8; padding: 9px 14px; font-family: 'DM Mono', monospace; font-size: 10px; cursor: pointer; border-radius: 5px; white-space: nowrap; -webkit-tap-highlight-color: transparent; }
+    .btn-undo:active { background: #f5f5f5; }
+
+    .input { border: 1.5px solid #e8e8e8; border-radius: 8px; padding: 13px 14px; font-family: 'DM Mono', monospace; font-size: 13px; color: #000; outline: none; background: #fff; width: 100%; transition: border-color 0.15s; -webkit-appearance: none; }
+    .input:focus { border-color: #000; }
+    .input.sm { padding: 10px 12px; font-size: 12px; border-radius: 6px; }
+    textarea.input { resize: none; }
+
+    .budget-card { background: #fff; border-radius: 16px; padding: 22px; cursor: pointer; transition: transform 0.12s; border: 1.5px solid #ececec; position: relative; -webkit-tap-highlight-color: transparent; }
+    .budget-card:active { transform: scale(0.982); }
+
+    .panel { background: #fff; border-radius: 12px; border: 1.5px solid #ececec; padding: 18px; }
+
+    .tpl-chip { border: 1.5px solid #e8e8e8; border-radius: 10px; padding: 14px 8px; cursor: pointer; text-align: center; background: #fff; -webkit-tap-highlight-color: transparent; transition: all 0.12s; font-family: 'DM Mono', monospace; }
+    .tpl-chip:active { transform: scale(0.95); }
+    .tpl-chip.sel { background: #000; color: #fff; border-color: #000; }
+
+    .icon-opt { width: 42px; height: 42px; border-radius: 8px; border: 1.5px solid #e8e8e8; display: inline-flex; align-items: center; justify-content: center; font-size: 17px; cursor: pointer; background: #fff; -webkit-tap-highlight-color: transparent; transition: all 0.12s; }
+    .icon-opt.sel { background: #000; color: #fff; border-color: #000; }
+
+    .step-row { padding: 14px 0; border-bottom: 1px solid #f3f3f3; display: flex; align-items: center; gap: 12px; }
+    .step-row:last-child { border-bottom: none; }
+
+    .dbadge { display: inline-flex; align-items: center; gap: 5px; background: #f4f4f4; border-radius: 5px; padding: 5px 10px; font-family: 'DM Mono', monospace; font-size: 10px; color: #666; white-space: nowrap; letter-spacing: 0.02em; }
+    .dbadge.over { background: #000; color: #fff; }
+    .dbadge.soon { background: #1a1a1a; color: #fff; }
+
+    .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 200; display: flex; align-items: flex-end; }
+    .sheet { background: #fff; border-radius: 20px 20px 0 0; width: 100%; max-height: 93vh; overflow-y: auto; padding: 0 20px 52px; }
+    .sheet-handle { width: 36px; height: 4px; background: #ddd; border-radius: 2px; margin: 14px auto 0; }
+
+    .confirm-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.55); z-index: 300; display: flex; align-items: center; justify-content: center; padding: 24px; }
+    .confirm-box { background: #fff; border-radius: 16px; padding: 28px 24px; width: 100%; max-width: 340px; }
+
+    .lbl { font-family: 'DM Mono', monospace; font-size: 9px; color: #aaa; letter-spacing: 0.14em; text-transform: uppercase; margin-bottom: 7px; }
+    .nav-btn { background: none; border: none; font-family: 'DM Mono', monospace; font-size: 12px; color: #000; cursor: pointer; padding: 5px 0; display: flex; align-items: center; gap: 7px; -webkit-tap-highlight-color: transparent; letter-spacing: 0.02em; }
+    .stat-pill { background: #fff; border: 1.5px solid #ececec; border-radius: 10px; padding: 12px 18px; flex-shrink: 0; }
+
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+
+<div id="app"></div>
+
+<script>
+// ─── State ─────────────────────────────────────────────────────────────────────
+const TODAY = new Date().toISOString().split("T")[0];
+const ICONS = ["⬛","◼","▪","□","▫","○","◇","▲","◉","■","▽","◈"];
+
+const DEFAULT_PROFILES = [
+  { id: "web-project", label: "Web Project", icon: "⬛", steps: [
+    { name: "Discovery Call", amount: 1500 }, { name: "Wireframes", amount: 2500 },
+    { name: "UI Design", amount: 5000 }, { name: "Development", amount: 12000 },
+    { name: "Testing & QA", amount: 2500 }, { name: "Launch", amount: 1500 },
+  ]},
+  { id: "branding", label: "Branding", icon: "◼", steps: [
+    { name: "Brand Audit", amount: 2000 }, { name: "Mood Board", amount: 1000 },
+    { name: "Logo Design", amount: 4000 }, { name: "Brand Guidelines", amount: 3000 },
+    { name: "Asset Delivery", amount: 1500 },
+  ]},
+  { id: "marketing", label: "Marketing", icon: "▪", steps: [
+    { name: "Strategy Session", amount: 2000 }, { name: "Content Creation", amount: 5000 },
+    { name: "Ad Campaign", amount: 6000 }, { name: "Analytics Setup", amount: 2000 },
+    { name: "Monthly Report", amount: 1500 },
+  ]},
+  { id: "photography", label: "Photography", icon: "□", steps: [
+    { name: "Pre-shoot Consult", amount: 600 }, { name: "Location Scout", amount: 1000 },
+    { name: "Shoot Day", amount: 4500 }, { name: "Editing", amount: 2500 },
+    { name: "Final Delivery", amount: 600 },
+  ]},
+  { id: "consulting", label: "Consulting", icon: "▫", steps: [
+    { name: "Initial Assessment", amount: 2500 }, { name: "Research Phase", amount: 4000 },
+    { name: "Strategy Report", amount: 5000 }, { name: "Presentation", amount: 2000 },
+    { name: "Follow-up Support", amount: 3000 },
+  ]},
+  { id: "custom", label: "Start Blank", icon: "○", steps: [] },
+];
+
+const SAMPLE_BUDGETS = [
+  { id: 1, name: "Kwame Asante", totalBudget: 25000, startDate: "2024-03-01", dueDate: "2026-04-15", note: "Website redesign",
+    steps: [{ id: 1, name: "Consultation", amount: 1500, status: "paid" }, { id: 2, name: "Design Phase", amount: 5000, status: "paid" }, { id: 3, name: "Development", amount: 12000, status: "pending" }, { id: 4, name: "Final Delivery", amount: 6500, status: "pending" }] },
+  { id: 2, name: "Abena Mensah", totalBudget: 18000, startDate: "2024-03-10", dueDate: "2026-03-20", note: "Brand identity & print",
+    steps: [{ id: 1, name: "Research", amount: 2500, status: "paid" }, { id: 2, name: "Copywriting", amount: 4000, status: "skipped" }, { id: 3, name: "Photography", amount: 6500, status: "pending" }, { id: 4, name: "Print & Ship", amount: 5000, status: "pending" }] },
+  { id: 3, name: "Kofi Boateng", totalBudget: 40000, startDate: "2024-01-15", dueDate: "2026-05-01", note: "Full-stack app build",
+    steps: [{ id: 1, name: "Kickoff", amount: 3000, status: "paid" }, { id: 2, name: "Architecture", amount: 10000, status: "paid" }, { id: 3, name: "Build", amount: 18000, status: "paid" }, { id: 4, name: "QA Testing", amount: 6000, status: "pending" }, { id: 5, name: "Launch", amount: 3000, status: "pending" }] },
+];
+
+// ─── Persistence ────────────────────────────────────────────────────────────────
+function load(key, def) {
+  try { const s = localStorage.getItem(key); return s ? JSON.parse(s) : def; } catch { return def; }
+}
+function save(key, val) {
+  try { localStorage.setItem(key, JSON.stringify(val)); } catch {}
+}
+
+let state = {
+  budgets: load("budgets_v1", SAMPLE_BUDGETS),
+  profiles: load("profiles_v1", DEFAULT_PROFILES),
+  view: "dashboard", // "dashboard" | "stepview" | "templates"
+  selectedBudget: null,
+};
+
+function setState(patch) {
+  Object.assign(state, typeof patch === "function" ? patch(state) : patch);
+  if ("budgets" in (typeof patch === "function" ? {} : patch)) save("budgets_v1", state.budgets);
+  if ("profiles" in (typeof patch === "function" ? {} : patch)) save("profiles_v1", state.profiles);
+  render();
+}
+
+// ─── Helpers ───────────────────────────────────────────────────────────────────
+function fmt(v) {
+  if (isNaN(v) || v == null) return "₵0";
+  return "₵" + Number(v).toLocaleString("en-GH", { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+}
+function getInitials(name) {
+  return name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+}
+function calcStats(b) {
+  const spent = b.steps.filter(s => s.status === "paid").reduce((a, s) => a + s.amount, 0);
+  return { spent, pct: Math.min(100, b.totalBudget > 0 ? (spent / b.totalBudget) * 100 : 0), remaining: b.totalBudget - spent };
+}
+function fmtDate(d) {
+  if (!d) return "—";
+  const [y, m, day] = d.split("-");
+  return new Date(y, m - 1, day).toLocaleDateString("en-GH", { month: "short", day: "numeric", year: "numeric" });
+}
+function daysUntil(d) {
+  if (!d) return null;
+  return Math.ceil((new Date(d) - new Date()) / 86400000);
+}
+function h(tag, attrs, ...children) {
+  const el = document.createElement(tag);
+  if (attrs) {
+    for (const [k, v] of Object.entries(attrs)) {
+      if (k === "style" && typeof v === "object") {
+        for (const [sk, sv] of Object.entries(v)) el.style[sk] = sv;
+      } else if (k.startsWith("on") && typeof v === "function") {
+        el.addEventListener(k.slice(2).toLowerCase(), v);
+      } else if (k === "className") {
+        el.className = v;
+      } else if (k === "value" && (tag === "input" || tag === "textarea")) {
+        el.value = v;
+      } else if (k === "placeholder") {
+        el.placeholder = v;
+      } else if (k === "type") {
+        el.type = v;
+      } else if (k === "rows") {
+        el.rows = v;
+      } else {
+        el.setAttribute(k, v);
+      }
+    }
+  }
+  for (const c of children.flat()) {
+    if (c == null || c === false) continue;
+    el.appendChild(typeof c === "string" ? document.createTextNode(c) : c);
+  }
+  return el;
+}
+
+// ─── Confirm Dialog ─────────────────────────────────────────────────────────────
+function renderConfirm(message, onConfirm, onCancel) {
+  const overlay = h("div", { className: "confirm-overlay", onClick: onCancel },
+    h("div", { className: "confirm-box", onClick: e => e.stopPropagation() },
+      h("div", { style: { fontFamily: "'Fraunces', serif", fontSize: "22px", fontWeight: 700, color: "#000", marginBottom: "10px" } }, "Are you sure?"),
+      h("div", { style: { fontFamily: "'DM Mono', monospace", fontSize: "12px", color: "#666", lineHeight: "1.6", marginBottom: "24px" } }, message),
+      h("div", { style: { display: "flex", gap: "10px" } },
+        h("button", { className: "btn-outline", onClick: onCancel, style: { flex: "1", padding: "13px 0" } }, "Cancel"),
+        h("button", { className: "btn-primary", onClick: onConfirm, style: { flex: "1", padding: "13px 0" } }, "Delete"),
+      )
+    )
+  );
+  return overlay;
+}
+
+// ─── Template Editor Sheet ──────────────────────────────────────────────────────
+function renderTemplateEditorSheet(template, onClose, onSave, onDelete) {
+  const isNew = !template;
+  let label = template?.label || "";
+  let icon = template?.icon || "⬛";
+  let steps = (template?.steps || []).map((s, i) => ({ ...s, _id: i }));
+  let newName = "", newAmt = "";
+  let confirmDelete = false;
+
+  const container = h("div", {});
+
+  function addStep() {
+    if (!newName.trim()) return;
+    steps = [...steps, { _id: Date.now(), name: newName.trim(), amount: parseFloat(newAmt) || 0 }];
+    newName = ""; newAmt = "";
+    rebuildSheet();
+  }
+  function removeStep(id) { steps = steps.filter(s => s._id !== id); rebuildSheet(); }
+  function updateStepField(id, field, val) {
+    steps = steps.map(s => s._id === id ? { ...s, [field]: field === "amount" ? (parseFloat(val) || 0) : val } : s);
+  }
+  function handleSave() {
+    if (!label.trim()) return;
+    onSave({ label: label.trim(), icon, steps: steps.map(({ _id, ...s }) => s) });
+    onClose();
+  }
+
+  function rebuildSheet() {
+    container.innerHTML = "";
+
+    if (confirmDelete) {
+      container.appendChild(renderConfirm(
+        `"${label}" will be permanently deleted.`,
+        () => { if (onDelete) onDelete(); onClose(); },
+        () => { confirmDelete = false; rebuildSheet(); }
+      ));
+    }
+
+    const overlay = h("div", { className: "overlay", onClick: onClose },
+      h("div", { className: "sheet", onClick: e => e.stopPropagation() },
+        h("div", { className: "sheet-handle" }),
+        h("div", { style: { position: "sticky", top: 0, background: "#fff", padding: "18px 0 14px", zIndex: 10, borderBottom: "1px solid #f0f0f0", marginBottom: "24px" } },
+          h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" } },
+            h("div", { style: { fontFamily: "'Fraunces', serif", fontSize: "26px", fontWeight: 700, color: "#000" } }, isNew ? "New Template" : "Edit Template"),
+            h("button", { className: "btn-icon", onClick: onClose }, "×")
+          )
+        ),
+
+        // Label input
+        h("div", { style: { marginBottom: "20px" } },
+          h("div", { className: "lbl" }, "Template Name"),
+          (() => {
+            const inp = h("input", { className: "input", placeholder: "e.g. Event Planning", value: label });
+            inp.addEventListener("input", e => { label = e.target.value; });
+            return inp;
+          })()
+        ),
+
+        // Icon picker
+        h("div", { style: { marginBottom: "24px" } },
+          h("div", { className: "lbl" }, "Icon"),
+          h("div", { style: { display: "flex", gap: "8px", flexWrap: "wrap" } },
+            ...ICONS.map(ic => {
+              const el = h("div", { className: "icon-opt" + (icon === ic ? " sel" : "") }, ic);
+              el.addEventListener("click", () => { icon = ic; rebuildSheet(); });
+              return el;
+            })
+          )
+        ),
+
+        // Steps list
+        h("div", { className: "lbl" }, "Steps"),
+        h("div", { className: "panel", style: { padding: "0 16px", marginBottom: "12px" } },
+          steps.length === 0
+            ? h("div", { style: { padding: "18px 0", textAlign: "center", fontFamily: "'DM Mono', monospace", fontSize: "11px", color: "#ccc" } }, "No steps yet — add one below")
+            : null,
+          ...steps.map((s, i) => {
+            const nameInp = h("input", { className: "input sm", value: s.name, placeholder: "Step name", style: { flex: "2" } });
+            nameInp.addEventListener("input", e => updateStepField(s._id, "name", e.target.value));
+            const amtInp = h("input", { className: "input sm", type: "number", value: s.amount || "", placeholder: "0" });
+            amtInp.addEventListener("input", e => updateStepField(s._id, "amount", e.target.value));
+            return h("div", { className: "step-row" },
+              h("div", { style: { fontFamily: "'DM Mono', monospace", fontSize: "10px", color: "#ccc", width: "16px", flexShrink: 0 } }, String(i + 1)),
+              nameInp,
+              h("div", { style: { display: "flex", alignItems: "center", gap: "4px", flex: "1" } },
+                h("span", { style: { fontFamily: "'DM Mono', monospace", fontSize: "12px", color: "#aaa", flexShrink: 0 } }, "₵"),
+                amtInp
+              ),
+              h("button", { className: "btn-icon", style: { fontSize: "16px" }, onClick: () => removeStep(s._id) }, "×")
+            );
+          })
+        ),
+
+        // Add step row
+        (() => {
+          const nameInp = h("input", { className: "input sm", placeholder: "Step name", value: newName, style: { flex: "2" } });
+          nameInp.addEventListener("input", e => { newName = e.target.value; });
+          nameInp.addEventListener("keydown", e => e.key === "Enter" && addStep());
+          const amtInp = h("input", { className: "input sm", type: "number", placeholder: "0", value: newAmt });
+          amtInp.addEventListener("input", e => { newAmt = e.target.value; });
+          amtInp.addEventListener("keydown", e => e.key === "Enter" && addStep());
+          return h("div", { style: { display: "flex", gap: "8px", marginBottom: "28px" } },
+            nameInp,
+            h("div", { style: { display: "flex", alignItems: "center", gap: "4px", flex: "1" } },
+              h("span", { style: { fontFamily: "'DM Mono', monospace", fontSize: "12px", color: "#aaa", flexShrink: 0 } }, "₵"),
+              amtInp
+            ),
+            h("button", { className: "btn-primary sm", onClick: addStep }, "+")
+          );
+        })(),
+
+        // Action buttons
+        h("div", { style: { display: "flex", gap: "10px" } },
+          !isNew ? h("button", { className: "btn-danger", onClick: () => { confirmDelete = true; rebuildSheet(); }, style: { flexShrink: 0 } }, "Delete") : null,
+          h("button", { className: "btn-outline", onClick: onClose, style: { flex: "1" } }, "Cancel"),
+          (() => {
+            const btn = h("button", { className: "btn-primary", style: { flex: "2", opacity: label.trim() ? "1" : "0.35" } }, isNew ? "Create" : "Save");
+            btn.addEventListener("click", handleSave);
+            return btn;
+          })()
+        )
+      )
+    );
+    container.appendChild(overlay);
+  }
+
+  rebuildSheet();
+  return container;
+}
+
+// ─── Templates View ─────────────────────────────────────────────────────────────
+function renderTemplatesView() {
+  let editorOpen = false;
+  let editingProfile = null;
+
+  const container = h("div", { style: { minHeight: "100vh", background: "#f6f6f6" } });
+
+  function rebuild() {
+    container.innerHTML = "";
+
+    // Nav
+    container.appendChild(
+      h("div", { style: { background: "#fff", borderBottom: "2px solid #000", padding: "0 20px", position: "sticky", top: 0, zIndex: 50 } },
+        h("div", { style: { maxWidth: "640px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: "60px" } },
+          h("button", { className: "nav-btn", onClick: () => setState({ view: "dashboard" }) },
+            h("span", { style: { fontSize: "18px" } }, "←"), " Back"
+          ),
+          h("span", { style: { fontFamily: "'Fraunces', serif", fontSize: "20px", fontWeight: 700 } }, "Templates"),
+          h("button", { className: "btn-primary sm", onClick: () => { editingProfile = null; editorOpen = true; rebuild(); } }, "+ New")
+        )
+      )
+    );
+
+    const body = h("div", { style: { maxWidth: "640px", margin: "0 auto", padding: "24px 16px" } });
+    body.appendChild(
+      h("div", { style: { fontFamily: "'DM Mono', monospace", fontSize: "11px", color: "#999", lineHeight: "1.7", marginBottom: "22px" } },
+        "Tap ", h("strong", { style: { color: "#000" } }, "Edit"), " to modify. ", h("strong", { style: { color: "#000" } }, "Delete"), " removes permanently."
+      )
+    );
+
+    const list = h("div", { style: { display: "flex", flexDirection: "column", gap: "2px" } });
+    state.profiles.forEach((p, i) => {
+      const totalAmt = p.steps.reduce((a, s) => a + s.amount, 0);
+      const isBlank = p.id === "custom";
+      const row = h("div", {
+        style: {
+          background: "#fff",
+          borderRadius: i === 0 ? "14px 14px 4px 4px" : i === state.profiles.length - 1 ? "4px 4px 14px 14px" : "4px",
+          padding: "16px 18px",
+          display: "flex",
+          alignItems: "center",
+          gap: "14px",
+          borderBottom: i < state.profiles.length - 1 ? "1px solid #f0f0f0" : "none"
+        }
+      },
+        h("div", { style: { width: "44px", height: "44px", borderRadius: "10px", background: "#f4f4f4", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "20px", flexShrink: 0 } }, p.icon),
+        h("div", { style: { flex: 1, minWidth: 0 } },
+          h("div", { style: { fontFamily: "'Fraunces', serif", fontSize: "18px", fontWeight: 700, color: "#000", lineHeight: "1.2" } }, p.label),
+          h("div", { style: { fontFamily: "'DM Mono', monospace", fontSize: "10px", color: "#aaa", marginTop: "3px" } },
+            isBlank ? "No steps · blank start" : `${p.steps.length} steps · ${fmt(totalAmt)}`
+          )
+        ),
+        !isBlank ? h("button", { className: "btn-ghost", onClick: () => { editingProfile = p; editorOpen = true; rebuild(); } }, "Edit") : null
+      );
+      list.appendChild(row);
+    });
+    body.appendChild(list);
+    body.appendChild(h("div", { style: { height: "40px" } }));
+    container.appendChild(body);
+
+    if (editorOpen) {
+      container.appendChild(renderTemplateEditorSheet(
+        editingProfile,
+        () => { editorOpen = false; editingProfile = null; rebuild(); },
+        (data) => {
+          if (editingProfile) {
+            setState({ profiles: state.profiles.map(p => p.id === editingProfile.id ? { ...p, ...data } : p) });
+          } else {
+            const blank = state.profiles.find(p => p.id === "custom");
+            const rest = state.profiles.filter(p => p.id !== "custom");
+            setState({ profiles: [...rest, { id: "tpl_" + Date.now(), ...data }, blank].filter(Boolean) });
+          }
+          editorOpen = false; editingProfile = null; rebuild();
+        },
+        editingProfile ? () => {
+          setState({ profiles: state.profiles.filter(p => p.id !== editingProfile.id) });
+          editorOpen = false; editingProfile = null; rebuild();
+        } : null
+      ));
+    }
+  }
+
+  rebuild();
+  return container;
+}
+
+// ─── Step View ──────────────────────────────────────────────────────────────────
+function renderStepView() {
+  const budget = state.selectedBudget;
+  let steps = [...budget.steps];
+  let total = budget.totalBudget;
+  let startDate = budget.startDate || "";
+  let dueDate = budget.dueDate || "";
+  let note = budget.note || "";
+  let editBudget = false;
+  let budgetInput = String(budget.totalBudget);
+  let showAdd = false;
+  let newStep = { name: "", amount: "" };
+  let editNote = false;
+  let editDates = false;
+
+  const container = h("div", { style: { minHeight: "100vh", background: "#f6f6f6" } });
+
+  function saveData(ns = steps, t = total, sd = startDate, dd = dueDate, nt = note) {
+    const updated = state.budgets.map(b => b.id === budget.id ? { ...b, steps: ns, totalBudget: t, startDate: sd, dueDate: dd, note: nt } : b);
+    save("budgets_v1", updated);
+    state.budgets = updated;
+    state.selectedBudget = { ...state.selectedBudget, steps: ns, totalBudget: t, startDate: sd, dueDate: dd, note: nt };
+    steps = ns; total = t; startDate = sd; dueDate = dd; note = nt;
+    rebuild();
+  }
+
+  function rebuild() {
+    container.innerHTML = "";
+    const spent = steps.filter(s => s.status === "paid").reduce((a, s) => a + s.amount, 0);
+    const remaining = total - spent;
+    const pct = Math.min(100, total > 0 ? (spent / total) * 100 : 0);
+    const dueDays = daysUntil(dueDate);
+    const isOverdue = dueDays !== null && dueDays < 0;
+    const isSoon = dueDays !== null && dueDays >= 0 && dueDays <= 7;
+
+    // Sticky nav
+    container.appendChild(
+      h("div", { style: { background: "#fff", borderBottom: "2px solid #000", padding: "0 20px", position: "sticky", top: 0, zIndex: 50 } },
+        h("div", { style: { maxWidth: "640px", margin: "0 auto", display: "flex", alignItems: "center", justifyContent: "space-between", height: "60px", gap: "12px" } },
+          h("button", { className: "nav-btn", onClick: () => setState({ view: "dashboard", selectedBudget: null }) },
+            h("span", { style: { fontSize: "18px" } }, "←"), " Back"
+          ),
+          h("div", { style: { fontFamily: "'Fraunces', serif", fontSize: "18px", fontWeight: 700, color: "#000", flex: 1, textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, budget.name),
+          h("div", { style: { flexShrink: 0 } },
+            isOverdue ? h("span", { className: "dbadge over", style: { fontSize: "9px" } }, "Overdue") :
+            isSoon ? h("span", { className: "dbadge soon", style: { fontSize: "9px" } }, "Due Soon") : null
+          )
+        )
+      )
+    );
+
+    const body = h("div", { style: { maxWidth: "640px", margin: "0 auto", padding: "22px 16px" } });
+
+    // Budget display/edit
+    const budgetSection = h("div", { style: { marginBottom: "20px" } });
+    if (editBudget) {
+      const inp = h("input", { className: "input", type: "number", value: budgetInput, style: { paddingLeft: "40px", fontSize: "28px", fontFamily: "'Fraunces', serif", fontWeight: 700, flex: "1" } });
+      inp.addEventListener("input", e => { budgetInput = e.target.value; });
+      inp.addEventListener("keydown", e => { if (e.key === "Enter") applyBudget(); });
+      const wrap = h("div", { style: { display: "flex", gap: "10px" } },
+        h("div", { style: { flex: "1", position: "relative" } },
+          h("span", { style: { position: "absolute", left: "14px", top: "50%", transform: "translateY(-50%)", fontFamily: "'Fraunces', serif", fontSize: "28px", color: "#ccc", pointerEvents: "none" } }, "₵"),
+          inp
+        ),
+        h("button", { className: "btn-primary", onClick: applyBudget }, "Set")
+      );
+      budgetSection.appendChild(wrap);
+      setTimeout(() => inp.focus(), 0);
+    } else {
+      const clickArea = h("div", { style: { cursor: "pointer" } },
+        h("div", { className: "lbl" }, "Total Budget — tap to edit"),
+        h("div", { style: { fontFamily: "'Fraunces', serif", fontSize: "52px", fontWeight: 900, color: "#000", lineHeight: 1, letterSpacing: "-0.02em" } }, fmt(total))
+      );
+      clickArea.addEventListener("click", () => { editBudget = true; budgetInput = String(total); rebuild(); });
+      budgetSection.appendChild(clickArea);
+    }
+    body.appendChild(budgetSection);
+
+    function applyBudget() {
+      const v = parseFloat(budgetInput);
+      if (!isNaN(v) && v > 0) { saveData(steps, v); }
+      else { editBudget = false; rebuild(); }
+    }
+
+    // Stats panels
+    body.appendChild(
+      h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", marginBottom: "14px" } },
+        h("div", { className: "panel" }, h("div", { className: "lbl" }, "Spent"), h("div", { style: { fontFamily: "'Fraunces', serif", fontSize: "28px", fontWeight: 700, color: "#000" } }, fmt(spent))),
+        h("div", { className: "panel" }, h("div", { className: "lbl" }, "Remaining"), h("div", { style: { fontFamily: "'Fraunces', serif", fontSize: "28px", fontWeight: 700, color: "#000", fontStyle: remaining < 0 ? "italic" : "normal" } }, fmt(remaining)))
+      )
+    );
+
+    // Progress bar
+    body.appendChild(
+      h("div", { className: "panel", style: { marginBottom: "14px" } },
+        h("div", { style: { display: "flex", justifyContent: "space-between", marginBottom: "10px" } },
+          h("span", { className: "lbl", style: { margin: 0 } }, "Progress"),
+          h("span", { style: { fontFamily: "'DM Mono', monospace", fontSize: "11px", fontWeight: 500, color: "#000" } }, pct.toFixed(0) + "%")
+        ),
+        h("div", { style: { height: "8px", background: "#f0f0f0", borderRadius: "4px", overflow: "hidden" } },
+          h("div", { style: { height: "100%", width: pct + "%", background: "#000", borderRadius: "4px", transition: "width 0.5s cubic-bezier(0.34,1.56,0.64,1)" } })
+        )
+      )
+    );
+
+    // Dates panel
+    const datesPanel = h("div", { className: "panel", style: { marginBottom: "10px" } });
+    const datesHeader = h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: editDates ? "14px" : "0" } },
+      h("span", { className: "lbl", style: { margin: 0 } }, "Dates"),
+      (() => {
+        const btn = h("button", { style: { background: "none", border: "none", fontFamily: "'DM Mono', monospace", fontSize: "10px", color: "#888", cursor: "pointer", letterSpacing: "0.06em" } }, editDates ? "SAVE" : "EDIT");
+        btn.addEventListener("click", () => {
+          if (editDates) { saveData(steps, total, startDate, dueDate, note); }
+          else { editDates = true; rebuild(); }
+        });
+        return btn;
+      })()
+    );
+    datesPanel.appendChild(datesHeader);
+    if (editDates) {
+      const sdInp = h("input", { className: "input sm", type: "date", value: startDate });
+      sdInp.addEventListener("input", e => { startDate = e.target.value; });
+      const ddInp = h("input", { className: "input sm", type: "date", value: dueDate });
+      ddInp.addEventListener("input", e => { dueDate = e.target.value; });
+      datesPanel.appendChild(
+        h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" } },
+          h("div", {}, h("div", { className: "lbl" }, "Start"), sdInp),
+          h("div", {}, h("div", { className: "lbl" }, "Due"), ddInp)
+        )
+      );
+    } else {
+      const dueDaysNow = daysUntil(dueDate);
+      const isOvNow = dueDaysNow !== null && dueDaysNow < 0;
+      datesPanel.appendChild(
+        h("div", { style: { display: "flex", gap: "28px", marginTop: "12px" } },
+          h("div", {},
+            h("div", { className: "lbl" }, "Start"),
+            h("div", { style: { fontFamily: "'Fraunces', serif", fontSize: "17px", fontWeight: 700, color: startDate ? "#000" : "#ccc" } }, startDate ? fmtDate(startDate) : "Not set")
+          ),
+          h("div", { style: { width: "1px", background: "#f0f0f0" } }),
+          h("div", {},
+            h("div", { className: "lbl" }, "Due"),
+            h("div", { style: { fontFamily: "'Fraunces', serif", fontSize: "17px", fontWeight: 700, color: "#000", fontStyle: isOvNow ? "italic" : "normal" } },
+              dueDate ? fmtDate(dueDate) : h("span", { style: { color: "#ccc", fontStyle: "normal" } }, "Not set"),
+              dueDaysNow !== null && dueDate ? h("span", { style: { fontFamily: "'DM Mono', monospace", fontSize: "10px", fontWeight: 400, color: "#999", marginLeft: "8px" } },
+                isOvNow ? `${Math.abs(dueDaysNow)}d over` : dueDaysNow === 0 ? "Today" : `${dueDaysNow}d left`
+              ) : null
+            )
+          )
+        )
+      );
+    }
+    body.appendChild(datesPanel);
+
+    // Note panel
+    const notePanel = h("div", { className: "panel", style: { marginBottom: "22px" } });
+    const noteHeader = h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" } },
+      h("span", { className: "lbl", style: { margin: 0 } }, "Note"),
+      (() => {
+        const btn = h("button", { style: { background: "none", border: "none", fontFamily: "'DM Mono', monospace", fontSize: "10px", color: "#888", cursor: "pointer", letterSpacing: "0.06em" } }, editNote ? "SAVE" : "EDIT");
+        btn.addEventListener("click", () => {
+          if (editNote) { saveData(steps, total, startDate, dueDate, note); }
+          else { editNote = true; rebuild(); }
+        });
+        return btn;
+      })()
+    );
+    notePanel.appendChild(noteHeader);
+    if (editNote) {
+      const ta = h("textarea", { className: "input", rows: 2, placeholder: "Add a note...", style: { marginTop: "12px" } });
+      ta.value = note;
+      ta.addEventListener("input", e => { note = e.target.value; });
+      notePanel.appendChild(ta);
+    } else {
+      const noteEl = h("div", { style: { fontFamily: "'Fraunces', serif", fontSize: "16px", color: note ? "#000" : "#ccc", marginTop: "10px", fontStyle: note ? "normal" : "italic", cursor: "pointer" } }, note || "Tap to add a note");
+      noteEl.addEventListener("click", () => { editNote = true; rebuild(); });
+      notePanel.appendChild(noteEl);
+    }
+    body.appendChild(notePanel);
+
+    // Steps
+    body.appendChild(h("div", { className: "lbl", style: { marginBottom: "10px" } }, "Steps"));
+    const stepsPanel = h("div", { className: "panel", style: { padding: "0 16px", marginBottom: "12px" } });
+    if (steps.length === 0) {
+      stepsPanel.appendChild(h("div", { style: { padding: "22px 0", textAlign: "center", fontFamily: "'DM Mono', monospace", fontSize: "11px", color: "#ccc" } }, "No steps yet"));
+    }
+    steps.forEach((step, i) => {
+      const row = h("div", { className: "step-row" },
+        h("div", {
+          style: {
+            width: "30px", height: "30px", borderRadius: "50%", flexShrink: 0,
+            background: step.status === "paid" ? "#000" : "#f4f4f4",
+            border: `2px solid ${step.status === "paid" ? "#000" : "#e8e8e8"}`,
+            display: "flex", alignItems: "center", justifyContent: "center",
+            fontFamily: "'DM Mono', monospace", fontSize: "10px",
+            color: step.status === "paid" ? "#fff" : "#bbb", fontWeight: 500
+          }
+        }, step.status === "paid" ? "✓" : String(i + 1)),
+        h("div", { style: { flex: 1, minWidth: 0 } },
+          h("div", { style: { fontFamily: "'Fraunces', serif", fontSize: "17px", fontWeight: 700, color: step.status === "skipped" ? "#ccc" : "#000", textDecoration: step.status === "skipped" ? "line-through" : "none", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, step.name),
+          h("div", { style: { fontFamily: "'DM Mono', monospace", fontSize: "11px", color: step.status === "paid" ? "#000" : step.status === "skipped" ? "#ddd" : "#888", fontWeight: step.status === "paid" ? 500 : 400 } },
+            fmt(step.amount),
+            step.status === "skipped" ? h("span", { style: { marginLeft: "6px", fontSize: "9px", color: "#ccc" } }, "skipped") : null
+          )
+        ),
+        h("div", { style: { display: "flex", gap: "6px", flexShrink: 0 } },
+          step.status === "pending" ? h("button", { className: "btn-primary sm", onClick: () => { steps = steps.map(s => s.id === step.id ? { ...s, status: "paid" } : s); saveData(steps); } }, "Pay") : null,
+          step.status === "pending" ? h("button", { className: "btn-ghost", onClick: () => { steps = steps.map(s => s.id === step.id ? { ...s, status: "skipped" } : s); saveData(steps); } }, "Skip") : null,
+          (step.status === "paid" || step.status === "skipped") ? h("button", { className: "btn-undo", onClick: () => { steps = steps.map(s => s.id === step.id ? { ...s, status: "pending" } : s); saveData(steps); } }, "↩") : null,
+          h("button", { className: "btn-icon", style: { fontSize: "16px" }, onClick: () => { steps = steps.filter(s => s.id !== step.id); saveData(steps); } }, "×")
+        )
+      );
+      stepsPanel.appendChild(row);
+    });
+    body.appendChild(stepsPanel);
+
+    // Add step
+    if (!showAdd) {
+      const addBtn = h("button", { style: { width: "100%", background: "#fff", border: "2px dashed #d8d8d8", color: "#aaa", padding: "15px", borderRadius: "12px", cursor: "pointer", fontFamily: "'DM Mono', monospace", fontSize: "11px", letterSpacing: "0.07em", textTransform: "uppercase" } }, "+ Add Step");
+      addBtn.addEventListener("click", () => { showAdd = true; rebuild(); });
+      body.appendChild(addBtn);
+    } else {
+      const nameInp = h("input", { className: "input", placeholder: "Step name", value: newStep.name });
+      nameInp.addEventListener("input", e => { newStep.name = e.target.value; });
+      const amtInp = h("input", { className: "input", placeholder: "0", type: "number", value: newStep.amount });
+      amtInp.addEventListener("input", e => { newStep.amount = e.target.value; });
+      amtInp.addEventListener("keydown", e => { if (e.key === "Enter") addStepFn(); });
+      const addPanel = h("div", { className: "panel" },
+        h("div", { className: "lbl", style: { marginBottom: "14px" } }, "New Step"),
+        h("div", { style: { display: "flex", flexDirection: "column", gap: "10px" } },
+          nameInp,
+          h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
+            h("span", { style: { fontFamily: "'DM Mono', monospace", fontSize: "13px", color: "#aaa", flexShrink: 0 } }, "₵"),
+            amtInp
+          ),
+          h("div", { style: { display: "flex", gap: "10px" } },
+            h("button", { className: "btn-primary", style: { flex: "1" }, onClick: addStepFn }, "Add Step"),
+            h("button", { className: "btn-outline", onClick: () => { showAdd = false; rebuild(); } }, "Cancel")
+          )
+        )
+      );
+      body.appendChild(addPanel);
+    }
+
+    function addStepFn() {
+      if (!newStep.name || !newStep.amount) return;
+      steps = [...steps, { id: Date.now(), name: newStep.name, amount: parseFloat(newStep.amount), status: "pending" }];
+      newStep = { name: "", amount: "" }; showAdd = false;
+      saveData(steps);
+    }
+
+    // Step summary
+    body.appendChild(
+      h("div", { style: { marginTop: "24px", display: "flex", gap: "18px", fontFamily: "'DM Mono', monospace", fontSize: "10px", color: "#bbb", paddingBottom: "48px" } },
+        h("span", {}, steps.filter(s => s.status === "paid").length + " paid"),
+        h("span", {}, steps.filter(s => s.status === "skipped").length + " skipped"),
+        h("span", {}, steps.filter(s => s.status === "pending").length + " pending")
+      )
+    );
+
+    container.appendChild(body);
+  }
+
+  rebuild();
+  return container;
+}
+
+// ─── New Budget Sheet ───────────────────────────────────────────────────────────
+function renderNewBudgetSheet(onClose, onCreate) {
+  let step = 1;
+  let name = "", amount = "", startDate = TODAY, dueDate = "", note = "", selProfile = null;
+
+  const container = h("div", {});
+
+  function handleCreate() {
+    if (!name || !amount || !selProfile) return;
+    const p = state.profiles.find(x => x.id === selProfile);
+    onCreate({ id: Date.now(), name, totalBudget: parseFloat(amount), startDate, dueDate, note, steps: p.steps.map((s, i) => ({ ...s, id: Date.now() + i + 1, status: "pending" })) });
+    onClose();
+  }
+
+  function rebuild() {
+    container.innerHTML = "";
+    const chosen = state.profiles.find(p => p.id === selProfile);
+
+    const overlay = h("div", { className: "overlay", onClick: onClose },
+      h("div", { className: "sheet", onClick: e => e.stopPropagation() },
+        h("div", { className: "sheet-handle" }),
+        h("div", { style: { position: "sticky", top: 0, background: "#fff", padding: "18px 0 14px", zIndex: 10, borderBottom: "1px solid #f0f0f0", marginBottom: "24px" } },
+          h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "center" } },
+            h("div", { style: { fontFamily: "'Fraunces', serif", fontSize: "26px", fontWeight: 700, color: "#000" } }, step === 1 ? "New Budget" : "Pick Template"),
+            h("button", { className: "btn-icon", onClick: onClose }, "×")
+          ),
+          h("div", { style: { display: "flex", gap: "6px", marginTop: "14px" } },
+            h("div", { style: { flex: 1, height: "3px", borderRadius: "2px", background: "#000", transition: "background 0.2s" } }),
+            h("div", { style: { flex: 1, height: "3px", borderRadius: "2px", background: step >= 2 ? "#000" : "#e8e8e8", transition: "background 0.2s" } })
+          )
+        ),
+
+        step === 1 ? (() => {
+          const nameInp = h("input", { className: "input", placeholder: "e.g. Ama Owusu", value: name });
+          nameInp.addEventListener("input", e => { name = e.target.value; });
+          const amtInp = h("input", { className: "input", placeholder: "0", type: "number", value: amount });
+          amtInp.addEventListener("input", e => { amount = e.target.value; });
+          const sdInp = h("input", { className: "input sm", type: "date", value: startDate });
+          sdInp.addEventListener("input", e => { startDate = e.target.value; });
+          const ddInp = h("input", { className: "input sm", type: "date", value: dueDate });
+          ddInp.addEventListener("input", e => { dueDate = e.target.value; });
+          const noteInp = h("input", { className: "input", placeholder: "Brief description...", value: note });
+          noteInp.addEventListener("input", e => { note = e.target.value; });
+          const nextBtn = h("button", { className: "btn-primary full", style: { opacity: name && amount ? "1" : "0.35", marginTop: "4px" } }, "Next → Choose Template");
+          nextBtn.addEventListener("click", () => { if (name && amount) { step = 2; rebuild(); } });
+          return h("div", { style: { display: "flex", flexDirection: "column", gap: "16px" } },
+            h("div", {}, h("div", { className: "lbl" }, "Name"), nameInp),
+            h("div", {},
+              h("div", { className: "lbl" }, "Total Budget (GHS)"),
+              h("div", { style: { display: "flex", alignItems: "center", gap: "8px" } },
+                h("span", { style: { fontFamily: "'DM Mono', monospace", fontSize: "15px", color: "#aaa" } }, "₵"),
+                amtInp
+              )
+            ),
+            h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px" } },
+              h("div", {}, h("div", { className: "lbl" }, "Start"), sdInp),
+              h("div", {}, h("div", { className: "lbl" }, "Due Date"), ddInp)
+            ),
+            h("div", {}, h("div", { className: "lbl" }, "Note (optional)"), noteInp),
+            nextBtn
+          );
+        })() : (() => {
+          const grid = h("div", { style: { display: "grid", gridTemplateColumns: "1fr 1fr 1fr", gap: "8px", marginBottom: "18px" } });
+          state.profiles.forEach(p => {
+            const chip = h("div", { className: "tpl-chip" + (selProfile === p.id ? " sel" : "") },
+              h("div", { style: { fontSize: "20px", marginBottom: "6px" } }, p.icon),
+              h("div", { style: { fontSize: "10px", fontWeight: 500, lineHeight: "1.3" } }, p.label),
+              p.steps.length > 0 ? h("div", { style: { fontSize: "9px", opacity: "0.5", marginTop: "3px" } }, p.steps.length + " steps") : null
+            );
+            chip.addEventListener("click", () => { selProfile = p.id; rebuild(); });
+            grid.appendChild(chip);
+          });
+
+          const preview = chosen && chosen.steps.length > 0 ? (() => {
+            const pnl = h("div", { className: "panel", style: { marginBottom: "18px" } },
+              h("div", { className: "lbl", style: { marginBottom: "12px" } }, "Preview — " + chosen.label)
+            );
+            chosen.steps.forEach((s, i, arr) => {
+              pnl.appendChild(h("div", { style: { display: "flex", justifyContent: "space-between", padding: "8px 0", borderBottom: i < arr.length - 1 ? "1px solid #f5f5f5" : "none" } },
+                h("span", { style: { fontFamily: "'Fraunces', serif", fontSize: "15px", fontWeight: 700, color: "#333" } }, s.name),
+                h("span", { style: { fontFamily: "'DM Mono', monospace", fontSize: "11px", color: "#888" } }, fmt(s.amount))
+              ));
+            });
+            return pnl;
+          })() : null;
+
+          const createBtn = h("button", { className: "btn-primary", style: { flex: "2", opacity: selProfile ? "1" : "0.35" } }, "Create Budget");
+          createBtn.addEventListener("click", handleCreate);
+
+          return h("div", {},
+            h("div", { style: { fontFamily: "'DM Mono', monospace", fontSize: "11px", color: "#999", marginBottom: "18px", lineHeight: "1.7" } }, "Choose a template to pre-load steps."),
+            grid,
+            preview,
+            h("div", { style: { display: "flex", gap: "10px" } },
+              h("button", { className: "btn-outline", style: { flex: "1" }, onClick: () => { step = 1; rebuild(); } }, "← Back"),
+              createBtn
+            )
+          );
+        })()
+      )
+    );
+    container.appendChild(overlay);
+  }
+
+  rebuild();
+  return container;
+}
+
+// ─── Dashboard ──────────────────────────────────────────────────────────────────
+function renderDashboard() {
+  let showNew = false;
+  const container = h("div", { style: { minHeight: "100vh", background: "#f6f6f6" } });
+
+  function rebuild() {
+    container.innerHTML = "";
+    const budgets = state.budgets;
+    const totalAll = budgets.reduce((a, b) => a + b.totalBudget, 0);
+    const spentAll = budgets.reduce((a, b) => a + b.steps.filter(s => s.status === "paid").reduce((x, s) => x + s.amount, 0), 0);
+
+    // Header
+    container.appendChild(
+      h("div", { style: { background: "#000", padding: "26px 20px 28px" } },
+        h("div", { style: { maxWidth: "640px", margin: "0 auto" } },
+          h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-start" } },
+            h("div", {},
+              h("div", { style: { fontFamily: "'DM Mono', monospace", fontSize: "9px", color: "#555", letterSpacing: "0.18em", textTransform: "uppercase", marginBottom: "6px" } }, "Budget Dashboard · GHS"),
+              h("div", { style: { fontFamily: "'Fraunces', serif", fontSize: "46px", fontWeight: 900, color: "#fff", lineHeight: 1, letterSpacing: "-0.02em" } }, fmt(totalAll)),
+              h("div", { style: { fontFamily: "'DM Mono', monospace", fontSize: "11px", color: "#555", marginTop: "8px" } }, fmt(spentAll) + " spent · " + fmt(totalAll - spentAll) + " remaining")
+            ),
+            h("button", {
+              style: { background: "transparent", border: "1px solid #333", borderRadius: "8px", padding: "10px 14px", fontFamily: "'DM Mono', monospace", fontSize: "10px", color: "#666", cursor: "pointer", letterSpacing: "0.07em", textTransform: "uppercase", flexShrink: 0 },
+              onClick: () => setState({ view: "templates" })
+            }, "Templates")
+          )
+        )
+      )
+    );
+
+    const body = h("div", { style: { maxWidth: "640px", margin: "0 auto", padding: "20px 16px" } });
+
+    // Stat pills
+    const pills = [
+      { label: "Total", value: budgets.length },
+      { label: "Active", value: budgets.filter(b => b.steps.some(s => s.status === "pending")).length },
+      { label: "Done", value: budgets.filter(b => b.steps.length > 0 && b.steps.every(s => s.status !== "pending")).length },
+      { label: "Overdue", value: budgets.filter(b => b.dueDate && daysUntil(b.dueDate) < 0).length },
+    ];
+    const pillsRow = h("div", { style: { display: "flex", gap: "8px", marginBottom: "20px", overflowX: "auto", paddingBottom: "2px" } });
+    pills.forEach(({ label, value }) => {
+      pillsRow.appendChild(
+        h("div", { className: "stat-pill" },
+          h("div", { className: "lbl", style: { margin: 0, marginBottom: "4px" } }, label),
+          h("div", { style: { fontFamily: "'Fraunces', serif", fontSize: "26px", fontWeight: 700, color: "#000" } }, String(value))
+        )
+      );
+    });
+    body.appendChild(pillsRow);
+
+    // Budget cards
+    const cards = h("div", { style: { display: "flex", flexDirection: "column", gap: "12px" } });
+    budgets.forEach(b => {
+      const { spent, pct, remaining } = calcStats(b);
+      const paidCount = b.steps.filter(s => s.status === "paid").length;
+      const pendingCount = b.steps.filter(s => s.status === "pending").length;
+      const dueDays = daysUntil(b.dueDate);
+      const isOverdue = dueDays !== null && dueDays < 0;
+      const isSoon = dueDays !== null && dueDays >= 0 && dueDays <= 7;
+
+      const card = h("div", { className: "budget-card" });
+      card.addEventListener("click", () => setState({ view: "stepview", selectedBudget: b }));
+
+      const delBtn = h("button", { className: "btn-icon", style: { position: "absolute", top: "14px", right: "14px" } }, "×");
+      delBtn.addEventListener("click", (e) => {
+        e.stopPropagation();
+        setState({ budgets: state.budgets.filter(x => x.id !== b.id) });
+      });
+      card.appendChild(delBtn);
+
+      card.appendChild(
+        h("div", { style: { display: "flex", alignItems: "center", gap: "14px", marginBottom: "14px", paddingRight: "30px" } },
+          h("div", { style: { width: "46px", height: "46px", borderRadius: "50%", background: "#000", color: "#fff", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Fraunces', serif", fontSize: "17px", fontWeight: 700, flexShrink: 0 } }, getInitials(b.name)),
+          h("div", { style: { flex: 1, minWidth: 0 } },
+            h("div", { style: { fontFamily: "'Fraunces', serif", fontSize: "22px", fontWeight: 700, color: "#000", lineHeight: "1.1", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, b.name),
+            b.note ? h("div", { style: { fontFamily: "'DM Mono', monospace", fontSize: "10px", color: "#aaa", marginTop: "3px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" } }, b.note) : null
+          )
+        )
+      );
+
+      if (b.startDate || b.dueDate) {
+        const badges = h("div", { style: { display: "flex", gap: "6px", marginBottom: "16px", flexWrap: "wrap" } });
+        if (b.startDate) badges.appendChild(h("span", { className: "dbadge" }, "▷ " + fmtDate(b.startDate)));
+        if (b.dueDate) {
+          const badge = h("span", { className: "dbadge" + (isOverdue ? " over" : isSoon ? " soon" : "") },
+            "◻ " + fmtDate(b.dueDate),
+            dueDays !== null ? h("span", { style: { opacity: "0.6" } }, isOverdue ? ` · ${Math.abs(dueDays)}d over` : dueDays === 0 ? " · Today" : ` · ${dueDays}d`) : null
+          );
+          badges.appendChild(badge);
+        }
+        card.appendChild(badges);
+      }
+
+      card.appendChild(
+        h("div", { style: { display: "flex", justifyContent: "space-between", alignItems: "flex-end", marginBottom: "14px" } },
+          h("div", {},
+            h("div", { className: "lbl" }, "Budget"),
+            h("div", { style: { fontFamily: "'Fraunces', serif", fontSize: "30px", fontWeight: 700, color: "#000", lineHeight: 1 } }, fmt(b.totalBudget))
+          ),
+          h("div", { style: { textAlign: "right" } },
+            h("div", { className: "lbl" }, "Remaining"),
+            h("div", { style: { fontFamily: "'Fraunces', serif", fontSize: "22px", fontWeight: 700, color: "#000", fontStyle: remaining < 0 ? "italic" : "normal" } }, fmt(remaining))
+          )
+        )
+      );
+
+      card.appendChild(
+        h("div", { style: { height: "5px", background: "#f0f0f0", borderRadius: "3px", overflow: "hidden", marginBottom: "8px" } },
+          h("div", { style: { height: "100%", width: pct + "%", background: "#000", borderRadius: "3px" } })
+        )
+      );
+
+      card.appendChild(
+        h("div", { style: { display: "flex", justifyContent: "space-between" } },
+          h("span", { style: { fontFamily: "'DM Mono', monospace", fontSize: "9px", color: "#bbb" } }, paidCount + " paid · " + pendingCount + " pending"),
+          h("span", { style: { fontFamily: "'DM Mono', monospace", fontSize: "9px", color: "#bbb" } }, pct.toFixed(0) + "%")
+        )
+      );
+
+      if (b.steps.length > 0) {
+        const bars = h("div", { style: { display: "flex", gap: "4px", marginTop: "12px", flexWrap: "wrap" } });
+        b.steps.forEach(s => {
+          bars.appendChild(h("div", { style: { height: "5px", width: "24px", borderRadius: "3px", background: s.status === "paid" ? "#000" : s.status === "skipped" ? "#e8e8e8" : "#d4d4d4" } }));
+        });
+        card.appendChild(bars);
+      }
+
+      cards.appendChild(card);
+    });
+    body.appendChild(cards);
+
+    const addBtn = h("button", { style: { width: "100%", marginTop: "14px", background: "#fff", border: "2px dashed #d8d8d8", color: "#aaa", padding: "18px", borderRadius: "16px", cursor: "pointer", fontFamily: "'DM Mono', monospace", fontSize: "11px", letterSpacing: "0.09em", textTransform: "uppercase" } }, "+ New Budget");
+    addBtn.addEventListener("click", () => { showNew = true; rebuild(); });
+    body.appendChild(addBtn);
+    body.appendChild(h("div", { style: { height: "52px" } }));
+    container.appendChild(body);
+
+    if (showNew) {
+      container.appendChild(renderNewBudgetSheet(
+        () => { showNew = false; rebuild(); },
+        b => {
+          setState({ budgets: [...state.budgets, b] });
+          showNew = false;
+        }
+      ));
+    }
+  }
+
+  rebuild();
+  return container;
+}
+
+// ─── Root Render ───────────────────────────────────────────────────────────────
+function render() {
+  const app = document.getElementById("app");
+  app.innerHTML = "";
+  if (state.view === "templates") {
+    app.appendChild(renderTemplatesView());
+  } else if (state.view === "stepview" && state.selectedBudget) {
+    app.appendChild(renderStepView());
+  } else {
+    app.appendChild(renderDashboard());
+  }
+}
+
+render();
+</script>
+</body>
+</html>
